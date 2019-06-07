@@ -5,10 +5,10 @@ use Illuminate\Http\Request;
 
 class baseController extends Controller
 {
-    public function index()
+    protected function output($results, $httpCode = 200)
     {
         return response()->json([
-            'version' => config('api.version')
-        ]);
+            'results' => $results
+        ], $httpCode);
     }
 }
