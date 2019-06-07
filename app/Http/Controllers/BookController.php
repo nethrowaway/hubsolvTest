@@ -11,22 +11,30 @@ class BookController extends baseController
 
     private $bookRelationships = ['categories', 'author'];
 
-    public function index(Request $request, Book $bookModel)
+    public function __construct(Request $request, Book $bookModel, Author $authorModel, Category $categoryModel)
+    {
+        $this->request = $request;
+        $this->bookModel = $bookModel;
+        $this->authorModel = $authorModel;
+        $this->categoryModel = $categoryModel;
+    }
+
+    public function index()
     {
         // get book data
-        $books = $bookModel->with($this->bookRelationships);
+        $books = $this->bookModel->with($this->bookRelationships);
         
         // filter by author if required
-        if ($request->has('author')) {
-            $authorName = $request->input('author');
+        if ($this->request->has('author')) {
+            $authorName = $this->request->input('author');
             $books = $books->whereHas('author', function ($q) use ($authorName) {
                 $q->where('name', 'like', '%' . $authorName . '%');
             });
         }
         
         // filter by category if required
-        if ($request->has('category')) {
-            $categoryName = $request->input('category');
+        if ($this->request->has('category')) {
+            $categoryName = $this->request->input('category');
             $books = $books->whereHas('categories', function ($q) use ($categoryName) {
                 $q->where('name', 'like', '%' . $categoryName . '%');
             });
@@ -38,10 +46,10 @@ class BookController extends baseController
         return $this->output($results);
     }
 
-    public function create(Request $request, Book $bookModel, Author $authorModel, Category $categoryModel)
+    public function create()
     {
         // validate input
-        $bookData = $request->validate([
+        $bookData = $this->request->validate([
             'title' => 'required|max:255',
             'isbn' => 'required|regex:/^[0-9\-]+$/|unique:books',
             'price' => 'required|numeric',
@@ -50,15 +58,15 @@ class BookController extends baseController
         ]);
 
         // create record
-        $book = $this->createOrUpdate(null, $bookData, $bookModel, $authorModel, $categoryModel);
+        $book = $this->createOrUpdate(null, $bookData);
 
         return $this->output([$book], 201);
     }
 
-    public function update($id, Request $request, Book $bookModel, Author $authorModel, Category $categoryModel)
+    public function update($id)
     {
         // validate input
-        $bookData = $request->validate([
+        $bookData = $this->request->validate([
             'title' => 'max:255',
             'isbn' => 'regex:/^[0-9\-]+$/|unique:books',
             'price' => 'numeric',
@@ -67,15 +75,15 @@ class BookController extends baseController
         ]);
 
         // update record
-        $book = $this->createOrUpdate($id, $bookData, $bookModel, $authorModel, $categoryModel);
+        $book = $this->createOrUpdate($id);
 
         return $this->output([$book]);
     }
 
-    private function createOrUpdate($id, $bookData, $bookModel, $authorModel, $categoryModel)
+    private function createOrUpdate($id)
     {
         // create author if it doesn't already exist
-        $author = $authorModel->firstOrCreate([
+        $author = $this->authorModel->firstOrCreate([
             'name' => $bookData['author']
         ]);
         $bookData['author_id'] = $author->id;
@@ -85,7 +93,7 @@ class BookController extends baseController
         $categoryIds = [];
         if (!empty($bookData['categories'])) {
             foreach ($bookData['categories'] as $bookCategory) {
-                $category = $categoryModel->firstOrCreate([
+                $category = $this->categoryModel->firstOrCreate([
                     'name' => $bookCategory
                 ]);
                 $categoryIds[] = $category->id;
@@ -95,9 +103,9 @@ class BookController extends baseController
 
         // if id was passed in, update that record, otherwise create a new record
         if (is_null($id)) {
-            $book = $bookModel->create($bookData);
+            $book = $this->bookModel->create($bookData);
         } else {
-            $book = $bookModel->where('id', '=', $id)->update($bookData);
+            $book = $this->bookModel->where('id', '=', $id)->update($bookData);
         }
 
         // add the book to the correct categories

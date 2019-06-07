@@ -6,11 +6,15 @@ use App\Category;
 
 class CategoryController extends baseController
 {
+    public function __construct(Category $categoryModel)
+    {
+        $this->categoryModel = $categoryModel;
+    }
 
-    public function index(Category $categoryModel)
+    public function index()
     {
         // get category data
-        $categories = $categoryModel->all();
+        $categories = $this->categoryModel->all();
 
         return $this->output($categories);
     }
