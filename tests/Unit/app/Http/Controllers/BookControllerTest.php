@@ -205,7 +205,18 @@ class BookControllerTest extends TestCase
             ->once()
             ->andReturn(true);
         $this->bookMock
-            ->shouldReceive('jsonSerialize')
+            ->shouldReceive('getAttribute')
+            ->andReturn(1);
+        $this->bookMock
+            ->shouldReceive('where')
+            ->once()
+            ->andReturn($this->bookMock);
+        $this->bookMock
+            ->shouldReceive('with')
+            ->once()
+            ->andReturn($this->bookMock);
+        $this->bookMock
+            ->shouldReceive('get')
             ->once()
             ->andReturn((object)$this->postMockReturnData);
 
@@ -252,7 +263,18 @@ class BookControllerTest extends TestCase
             ->once()
             ->andReturn(true);
         $this->bookMock
-            ->shouldReceive('jsonSerialize')
+            ->shouldReceive('getAttribute')
+            ->andReturn(1);
+        $this->bookMock
+            ->shouldReceive('where')
+            ->once()
+            ->andReturn($this->bookMock);
+        $this->bookMock
+            ->shouldReceive('with')
+            ->once()
+            ->andReturn($this->bookMock);
+        $this->bookMock
+            ->shouldReceive('get')
             ->once()
             ->andReturn((object)$this->postMockReturnData);
 
