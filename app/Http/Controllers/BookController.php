@@ -60,7 +60,7 @@ class BookController extends baseController
         // create record
         $book = $this->createOrUpdate(null, $bookData);
 
-        return $this->output([$book], 201);
+        return $this->output($book, 201);
     }
 
     public function update($id)
@@ -75,12 +75,12 @@ class BookController extends baseController
         ]);
 
         // update record
-        $book = $this->createOrUpdate($id);
+        $book = $this->createOrUpdate($id, $bookData);
 
-        return $this->output([$book]);
+        return $this->output($book);
     }
 
-    private function createOrUpdate($id)
+    private function createOrUpdate($id, $bookData)
     {
         // create author if it doesn't already exist
         $author = $this->authorModel->firstOrCreate([

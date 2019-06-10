@@ -35,8 +35,10 @@ class BookControllerTest extends TestCase
                 'name' => 'Robin Nixon'
             ],
             'categories' => [
-                'id' => 1,
-                'name' => 'PHP'
+                [
+                    'id' => 1,
+                    'name' => 'PHP'
+                ]
             ]
         ],
         [
@@ -49,8 +51,10 @@ class BookControllerTest extends TestCase
                 'name' => 'Robin Nixon'
             ],
             'categories' => [
-                'id' => 2,
-                'name' => 'Linux'
+                [
+                    'id' => 2,
+                    'name' => 'Linux'
+                ]
             ]
         ]
     ];
@@ -63,6 +67,31 @@ class BookControllerTest extends TestCase
         [
             'id' => 2,
             'name' => 'Christopher Negus'
+        ]
+    ];
+    private $postMockData = [
+        'title' => 'Modern PHP: New Features and Good Practices',
+        'isbn' => '978-1491905012',
+        'price' => 18.99,
+        'author' => 'Josh Lockhart',
+        'categories' => [
+            'PHP'
+        ]
+    ];
+    private $postMockReturnData = [
+        'id' => 3,
+        'title' => 'Modern PHP: New Features and Good Practices',
+        'isbn' => '978-1491905012',
+        'price' => 18.99,
+        'author' => [
+            'id' => 3,
+            'name' => 'Josh Lockhart'
+        ],
+        'categories' => [
+            [
+                'id' => 1,
+                'name' => 'PHP'
+            ]
         ]
     ];
 
@@ -86,7 +115,7 @@ class BookControllerTest extends TestCase
 
     public function testIndexBasic()
     {
-         $this->bookMock
+        $this->bookMock
             ->shouldReceive('with')
             ->once()
             ->andReturn($this->bookMock);
@@ -95,8 +124,6 @@ class BookControllerTest extends TestCase
             ->once()
             ->andReturn((object)$this->bookData);
 
-        $this->authorMock->allows()->with(Mockery::any())->andReturns($this->authorMock);
-        $this->categoryMock->allows()->with(Mockery::any())->andReturns($this->categoryMock);
         $this->requestMock->allows()->has(Mockery::any())->andReturns(false);
 
         $bookController = new BookController($this->requestMock, $this->bookMock, $this->authorMock, $this->categoryMock);
@@ -108,7 +135,7 @@ class BookControllerTest extends TestCase
 
     public function testIndexSpecificAuthor()
     {
-         $this->bookMock
+        $this->bookMock
             ->shouldReceive('with')
             ->once()
             ->andReturn($this->bookMock);
@@ -116,9 +143,6 @@ class BookControllerTest extends TestCase
             ->shouldReceive('get')
             ->once()
             ->andReturn((object)$this->bookData);
-
-        $this->authorMock->allows()->with(Mockery::any())->andReturns($this->authorMock);
-        $this->categoryMock->allows()->with(Mockery::any())->andReturns($this->categoryMock);
         
         $this->requestMock->allows()->has('author')->andReturns(true);
         $this->requestMock->allows()->has(Mockery::any())->andReturns(false);
@@ -139,7 +163,7 @@ class BookControllerTest extends TestCase
 
     public function testIndexSpecificCategory()
     {
-         $this->bookMock
+        $this->bookMock
             ->shouldReceive('with')
             ->once()
             ->andReturn($this->bookMock);
@@ -147,9 +171,6 @@ class BookControllerTest extends TestCase
             ->shouldReceive('get')
             ->once()
             ->andReturn((object)$this->bookData);
-
-        $this->authorMock->allows()->with(Mockery::any())->andReturns($this->authorMock);
-        $this->categoryMock->allows()->with(Mockery::any())->andReturns($this->categoryMock);
         
         $this->requestMock->allows()->has('category')->andReturns(true);
         $this->requestMock->allows()->has(Mockery::any())->andReturns(false);
@@ -166,5 +187,96 @@ class BookControllerTest extends TestCase
 
         $this->assertJson($returnData->content());
         $this->assertEquals($returnData->content(), json_encode(['results' => (object)$this->bookData]));
+    }
+
+    public function testCreateBook()
+    {
+
+        $this->bookMock
+            ->shouldReceive('categories')
+            ->once()
+            ->andReturn($this->bookMock);
+        $this->bookMock
+            ->shouldReceive('create')
+            ->once()
+            ->andReturn($this->bookMock);
+        $this->bookMock
+            ->shouldReceive('sync')
+            ->once()
+            ->andReturn(true);
+        $this->bookMock
+            ->shouldReceive('jsonSerialize')
+            ->once()
+            ->andReturn((object)$this->postMockReturnData);
+
+        $this->authorMock
+            ->shouldReceive('firstOrCreate')
+            ->with([
+                'name' => $this->postMockData['author']
+            ])->andReturns((object)$this->postMockReturnData['author']);
+
+        $this->categoryMock
+            ->shouldReceive('firstOrCreate')
+            ->with([
+                'name' => $this->postMockData['categories'][0]
+            ])->andReturns((object)$this->postMockReturnData['categories'][0]);
+        
+        $this->requestMock
+            ->shouldReceive('validate')
+            ->with(Mockery::any())
+            ->andReturn($this->postMockData);
+
+        $bookController = new BookController($this->requestMock, $this->bookMock, $this->authorMock, $this->categoryMock);
+        $returnData = $bookController->create();
+
+        $this->assertJson($returnData->content());
+        $this->assertEquals($returnData->content(), json_encode(['results' => (object)$this->postMockReturnData]));
+    }
+
+    public function testUpdateBook()
+    {
+        $this->bookMock
+            ->shouldReceive('categories')
+            ->once()
+            ->andReturn($this->bookMock);
+        $this->bookMock
+            ->shouldReceive('where')
+            ->once()
+            ->andReturn($this->bookMock);
+        $this->bookMock
+            ->shouldReceive('update')
+            ->once()
+            ->andReturn($this->bookMock);
+        $this->bookMock
+            ->shouldReceive('sync')
+            ->once()
+            ->andReturn(true);
+        $this->bookMock
+            ->shouldReceive('jsonSerialize')
+            ->once()
+            ->andReturn((object)$this->postMockReturnData);
+
+        $this->authorMock
+            ->shouldReceive('firstOrCreate')
+            ->with([
+                'name' => $this->postMockData['author']
+            ])->andReturns((object)$this->postMockReturnData['author']);
+
+        $this->categoryMock
+            ->shouldReceive('firstOrCreate')
+            ->with([
+                'name' => $this->postMockData['categories'][0]
+            ])->andReturns((object)$this->postMockReturnData['categories'][0]);
+        
+        $this->requestMock
+            ->shouldReceive('validate')
+            ->with(Mockery::any())
+            ->andReturn($this->postMockData);
+
+        $bookController = new BookController($this->requestMock, $this->bookMock, $this->authorMock, $this->categoryMock);
+        $returnData = $bookController->update(1);
+
+        $this->assertJson($returnData->content());
+        $this->assertEquals($returnData->content(), json_encode(['results' => (object)$this->postMockReturnData]));
     }
 }

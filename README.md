@@ -4,7 +4,7 @@
 
 * This is a Laravel application
 * Tests have only been written to cover code I have written, not to cover Laravel's boilerplate code
-* This has been tested locally using Laravel Homestead as a development environment
+* This has been tested locally using Laravel Homestead as a development environment, and Postman to make API calls
 
 ## Installation
 
@@ -17,6 +17,8 @@ Add to Homestead or any other local virtual environment, then run this from the 
 Just run:
 
 ```phpunit```
+
+From the root directory.
 
 ## Methods
 
@@ -46,7 +48,8 @@ Just run:
 ## Possible improvements
 
 * Pagination of results
+* Allow filtering by any field - e.g. by isbn
 * Convert the output to follow the [JSON API Specification](https://jsonapi.org)
 * Use the Repository Design Pattern for database interaction
-* A DELETE endpoint
-* An Authors endpoint, to list out all authors, number of books in stock, etc.
+* Add a DELETE endpoint
+* Add an authors endpoint, to list out all authors, number of books in stock and other useful stats
