@@ -111,6 +111,8 @@ class BookController extends baseController
         // add the book to the correct categories
         $book->categories()->sync($categoryIds);
 
-        return $book;
+        $fullResponse = $this->bookModel->where('id', '=', $book->id)->with($this->bookRelationships)->get();
+
+        return $fullResponse;
     }
 }
