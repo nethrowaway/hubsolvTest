@@ -10,7 +10,7 @@
 
 Add to Homestead or any other local virtual environment, then run this from the root directory to install dependancies, seed the database with initial data, etc:
 
-```./install-local.sh```
+```sh ./install-local.sh```
 
 ## Running unit tests
 
